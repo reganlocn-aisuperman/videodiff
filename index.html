@@ -2,241 +2,202 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>VideoDiff Pro - Quality Lab v1.4</title>
+    <title>VideoDiff Pro v1.14 - English Standard</title>
     <style>
-        :root { --primary: #3b82f6; --bg: #0f172a; --panel: #1e293b; --text: #f8fafc; --accent: #10b981; --warn: #f59e0b; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        :root { --primary: #3b82f6; --bg: #0f172a; --panel: #1e293b; --text: #f8fafc; --accent: #10b981; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         
         .header { width: 100%; max-width: 1200px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .top-btns { display: flex; gap: 10px; }
-        
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 1200px; position: relative; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 1200px; margin-bottom: 20px; }
         .card { background: var(--panel); padding: 15px; border-radius: 10px; border: 1px solid #334155; }
         
-        .input-group { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
-        .url-row { display: flex; gap: 8px; align-items: center; }
-        input[type="text"] { flex-grow: 1; background: #0f172a; border: 1px solid #475569; color: white; padding: 6px 10px; border-radius: 4px; font-size: 13px; }
+        /* Integrated Layout for Sync Resizing */
+        .viewer-wrap {
+            display: inline-flex;
+            flex-direction: column;
+            background: #000;
+            border: 2px solid #475569;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
 
-        /* 视频容器 */
-        .viewer-container { position: relative; width: 100%; max-width: 1000px; aspect-ratio: 16/9; background: #000; overflow: hidden; border: 2px solid #334155; margin-top: 20px; border-radius: 4px; }
-        video { position: absolute; width: 100%; height: 100%; object-fit: contain; }
-        
-        /* 左右分屏 */
+        .viewer-container { 
+            position: relative; 
+            width: 850px; height: 480px; 
+            resize: both; 
+            overflow: hidden;
+            min-width: 400px; min-height: 250px;
+        }
+
+        video { position: absolute; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
         #wrapperA { position: absolute; top:0; left:0; width: 50%; height: 100%; overflow: hidden; border-right: 2px solid var(--primary); z-index: 10; pointer-events: none; }
-        #videoA { width: 1000px; max-width: none; }
+        #videoA { width: 100%; height: 100%; }
 
-        #compareHandle { position: absolute; top: 0; left: 50%; width: 4px; height: 100%; background: var(--primary); transform: translateX(-50%); z-index: 11; cursor: col-resize; display: flex; align-items: center; justify-content: center; }
-        #compareHandle::after { content: "↔"; background: var(--primary); border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        #compareHandle { position: absolute; top: 0; left: 50%; width: 4px; height: 100%; background: var(--primary); transform: translateX(-50%); z-index: 11; cursor: col-resize; display:flex; align-items:center; justify-content:center; }
+        #compareHandle::after { content: "↔"; background: var(--primary); border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; color: white; }
 
-        /* 控制栏 */
-        .controls-bar { width: 100%; max-width: 1000px; background: var(--panel); padding: 12px 20px; border-radius: 8px; display: flex; align-items: center; gap: 15px; margin-top: 20px; box-sizing: border-box; }
-        #progressBar { flex-grow: 1; cursor: pointer; }
-        
-        /* 信息看板 */
+        .controls-bar { 
+            background: #1e293b; 
+            padding: 10px 15px; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            border-top: 1px solid #334155;
+            user-select: none;
+        }
+
         .stats-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-        .stat-tag { font-size: 11px; background: #0f172a; padding: 3px 10px; border-radius: 4px; color: var(--accent); border: 1px solid rgba(16,185,129,0.3); }
+        .stat-tag { font-size: 11px; background: rgba(59, 130, 246, 0.1); padding: 3px 8px; border-radius: 4px; color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.2); }
         
-        button { border: none; border-radius: 4px; cursor: pointer; font-weight: 600; transition: 0.2s; }
-        .btn-play { background: var(--primary); color: white; padding: 8px 20px; }
-        .btn-share { background: var(--accent); color: white; padding: 8px 15px; }
-        .btn-reset { background: #4b5563; color: white; padding: 8px 15px; }
-        .btn-tiny { background: #475569; color: white; font-size: 11px; padding: 6px 12px; }
-        .btn-sync-load { background: var(--warn); color: white; font-size: 11px; padding: 6px 12px; }
+        button { border: none; border-radius: 4px; cursor: pointer; font-weight: 600; padding: 6px 12px; font-size: 12px; transition: 0.2s; }
+        .btn-play { background: var(--primary); color: white; min-width: 70px; }
+        .btn-mode { background: #475569; color: white; }
+        .btn-mode.active { background: var(--accent); }
+        
+        input[type="range"] { flex-grow: 1; accent-color: var(--primary); cursor: pointer; }
+        input[type="text"] { background: #0f172a; border: 1px solid #475569; color: white; padding: 5px; border-radius: 4px; flex-grow: 1; font-size: 12px; }
+
+        .resize-drag { position: absolute; right: 0; bottom: 0; width: 15px; height: 15px; cursor: nwse-resize; z-index: 25; background: linear-gradient(135deg, transparent 50%, var(--primary) 50%); }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>VideoDiff <small style="opacity: 0.4; font-size: 14px;">v1.4 Pro</small></h1>
-    <div class="top-btns">
-        <button class="btn-reset" onclick="resetAll()">RESET ALL</button>
-        <button id="shareBtn" class="btn-share">SHARE URL</button>
+    <h2>VideoDiff <small style="opacity:0.5; font-size:12px;">v1.14 Standard</small></h2>
+    <div style="display:flex; gap:10px;">
+        <button style="background:#4b5563; color:white;" onclick="location.reload()">RESET</button>
+        <button style="background:var(--accent); color:white;" onclick="copyShareUrl()">SHARE URL</button>
     </div>
 </div>
 
 <div class="grid">
     <div class="card">
-        <strong style="color: var(--primary);">VIDEO A (Original Video)</strong>
-        <div class="input-group">
-            <input type="file" id="fileA" accept="video/*" onchange="handleSource('A', 'file')">
-            <div class="url-row">
-                <input type="text" id="urlA" placeholder="Paste Source URL...">
-                <button class="btn-tiny" onclick="handleSource('A', 'url')">LOAD</button>
-            </div>
+        <strong>VIDEO A (Original)</strong>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
+            <input type="file" id="fileA" onchange="handleSource('A', 'file')">
+            <div style="display:flex; gap:5px;"><input type="text" id="urlA" placeholder="Source URL"><button onclick="handleSource('A', 'url')" style="background:#475569; color:white;">LOAD</button></div>
         </div>
         <div id="infoA" class="stats-row"></div>
     </div>
-
     <div class="card">
-        <strong style="color: #94a3b8;">VIDEO B (Upscaled Video)</strong>
-        <div class="input-group">
-            <input type="file" id="fileB" accept="video/*" onchange="handleSource('B', 'file')">
-            <div class="url-row">
-                <input type="text" id="urlB" placeholder="Paste Upscaled URL...">
-                <button class="btn-tiny" onclick="handleSource('B', 'url')">LOAD</button>
-                <button class="btn-sync-load" onclick="loadBoth()">SYNC LOAD</button>
-            </div>
+        <strong>VIDEO B (Comparison)</strong>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
+            <input type="file" id="fileB" onchange="handleSource('B', 'file')">
+            <div style="display:flex; gap:5px;"><input type="text" id="urlB" placeholder="Target URL"><button onclick="handleSource('B', 'url')" style="background:#475569; color:white;">LOAD</button><button style="background:#f59e0b; color:white;" onclick="loadBoth()">SYNC LOAD</button></div>
         </div>
         <div id="infoB" class="stats-row"></div>
     </div>
 </div>
 
-<div class="viewer-container" id="viewer">
-    <video id="videoB" preload="auto"></video>
-    <div id="wrapperA">
-        <video id="videoA" preload="auto" muted></video>
+<div class="viewer-wrap" id="mainPlayer">
+    <div class="viewer-container" id="viewer">
+        <video id="videoB" loop preload="auto"></video>
+        <div id="wrapperA"><video id="videoA" loop preload="auto" muted></video></div>
+        <div id="compareHandle"></div>
+        <div class="resize-drag"></div>
     </div>
-    <div id="compareHandle"></div>
-</div>
-
-<div class="controls-bar">
-    <button id="playBtn" class="btn-play">PLAY</button>
-    <input type="range" id="progressBar" min="0" max="100" value="0" step="0.1">
-    <span id="timeDisplay" style="font-family: monospace; font-size: 13px; min-width: 50px;">0.0s</span>
     
-    <div style="display:flex; align-items:center; gap:10px; border-left:1px solid #475569; padding-left:15px;">
-        <span style="font-size:11px; color:#94a3b8;">Audio: Video B</span>
-        <input type="range" id="volSlider" min="0" max="1" step="0.1" value="0.8" style="width:60px;">
+    <div class="controls-bar">
+        <button id="playBtn" class="btn-play">PLAY</button>
+        <input type="range" id="progressBar" min="0" max="100" value="0" step="0.1">
+        <span id="timeDisplay" style="font-family:monospace; font-size:12px; min-width:45px;">0.0s</span>
+        
+        <div style="height: 20px; width: 1px; background: #334155; margin: 0 5px;"></div>
+        
+        <button id="modeBtn" class="btn-mode active">LOOP: ON</button>
+        <button style="background:#6366f1; color:white;" onclick="toggleFullscreen()">FULLSCREEN</button>
     </div>
 </div>
 
 <script>
     const vA = document.getElementById('videoA'), vB = document.getElementById('videoB');
     const wrapA = document.getElementById('wrapperA'), handle = document.getElementById('compareHandle');
-    const viewer = document.getElementById('viewer');
-    const playBtn = document.getElementById('playBtn');
+    const viewer = document.getElementById('viewer'), playBtn = document.getElementById('playBtn');
+    const progBar = document.getElementById('progressBar'), modeBtn = document.getElementById('modeBtn');
 
-    // 1. 增强版信息处理
-    async function handleSource(type, mode) {
-        let src = "";
-        let meta = { size: 'N/A' };
+    const resizeObserver = new ResizeObserver(() => {
+        vA.style.width = viewer.clientWidth + 'px';
+    });
+    resizeObserver.observe(viewer);
 
-        if (mode === 'file') {
-            const file = document.getElementById('file' + type).files[0];
-            if (!file) return;
-            meta.size = formatBytes(file.size);
-            src = URL.createObjectURL(file);
-            document.getElementById('url' + type).value = ""; 
-        } else {
-            src = document.getElementById('url' + type).value;
-            if (!src) return;
-            meta.size = await getRemoteSize(src);
-        }
-
-        const video = (type === 'A') ? vA : vB;
-        video.src = src;
-        video.load();
-
-        video.onloadedmetadata = () => {
-            const duration = formatTime(video.duration);
-            displayStats(type, `${video.videoWidth}x${video.videoHeight}`, meta.size, duration, "Detecting FPS...");
-            
-            // 实时侦测真实 FPS
-            setTimeout(() => {
-                estimateFPS(video, (fps) => {
-                    displayStats(type, `${video.videoWidth}x${video.videoHeight}`, meta.size, duration, fps + " FPS");
-                });
-            }, 600);
-
-            if(type === 'A') vA.style.width = viewer.offsetWidth + 'px';
-        };
-    }
-
-    async function getRemoteSize(url) {
-        try {
-            const response = await fetch(url, { method: 'HEAD' });
-            const size = response.headers.get('content-length');
-            return size ? formatBytes(size) : "Remote";
-        } catch (e) { return "Remote"; }
-    }
-
-    function formatBytes(bytes) {
-        if (bytes === 0) return '0 B';
-        const k = 1024;
-        const sizes = ['B', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
-
-    function formatTime(seconds) {
-        const m = Math.floor(seconds / 60);
-        const s = Math.floor(seconds % 60);
-        return `${m}:${s < 10 ? '0' : ''}${s}`;
-    }
-
-    function loadBoth() { handleSource('A', 'url'); handleSource('B', 'url'); }
-
-    function displayStats(type, res, size, dur, fps) {
-        document.getElementById('info' + type).innerHTML = `
-            <div class="stat-tag">RES: ${res}</div>
-            <div class="stat-tag">SIZE: ${size}</div>
-            <div class="stat-tag">DUR: ${dur}</div>
-            <div class="stat-tag">${fps}</div>
-        `;
-    }
-
-    function estimateFPS(video, callback) {
-        if (video.webkitDecodedFrameCount !== undefined) {
-            const startFrames = video.webkitDecodedFrameCount;
-            const startTime = performance.now();
-            video.play().then(() => {
-                setTimeout(() => {
-                    const elapsed = (performance.now() - startTime) / 1000;
-                    const frames = video.webkitDecodedFrameCount - startFrames;
-                    video.pause();
-                    video.currentTime = 0;
-                    callback(Math.round(frames / elapsed));
-                }, 600);
-            }).catch(() => callback("N/A"));
-        } else { callback("N/A"); }
-    }
-
-    // 2. 音画同步逻辑
-    playBtn.onclick = () => {
-        if (vA.paused) {
-            vB.play();
-            vA.currentTime = vB.currentTime;
-            vA.play();
-            playBtn.innerText = "PAUSE";
-        } else {
-            vA.pause(); vB.pause();
-            playBtn.innerText = "PLAY";
-        }
+    let isLoop = true;
+    modeBtn.onclick = () => {
+        isLoop = !isLoop;
+        vA.loop = vB.loop = isLoop;
+        modeBtn.innerText = isLoop ? "LOOP: ON" : "LOOP: OFF";
+        modeBtn.className = isLoop ? "btn-mode active" : "btn-mode";
     };
 
+    vB.onplay = () => vA.play();
+    vB.onpause = () => vA.pause();
+    vB.onseeking = () => vA.currentTime = vB.currentTime;
     vB.ontimeupdate = () => {
-        if (Math.abs(vA.currentTime - vB.currentTime) > 0.05) vA.currentTime = vB.currentTime;
-        document.getElementById('progressBar').value = (vB.currentTime / vB.duration) * 100 || 0;
+        if (Math.abs(vA.currentTime - vB.currentTime) > 0.1) vA.currentTime = vB.currentTime;
+        progBar.value = (vB.currentTime / vB.duration) * 100 || 0;
         document.getElementById('timeDisplay').innerText = vB.currentTime.toFixed(1) + 's';
     };
 
-    document.getElementById('volSlider').oninput = (e) => {
-        vB.volume = e.target.value; vA.muted = true;
+    async function handleSource(type, mode) {
+        const video = (type === 'A') ? vA : vB;
+        let sizeText = "N/A";
+        if (mode === 'file') {
+            const file = document.getElementById('file' + type).files[0];
+            video.src = URL.createObjectURL(file);
+            sizeText = (file.size / (1024 * 1024)).toFixed(2) + " MB";
+        } else {
+            const url = document.getElementById('url' + type).value;
+            video.src = url;
+            try {
+                const res = await fetch(url, { method: 'HEAD' });
+                sizeText = (res.headers.get('content-length') / (1024*1024)).toFixed(2) + " MB";
+            } catch(e) { sizeText = "Remote"; }
+        }
+        video.onloadedmetadata = () => {
+            document.getElementById('info' + type).innerHTML = `
+                <div class="stat-tag">Res: ${video.videoWidth}x${video.videoHeight}</div>
+                <div class="stat-tag">Dur: ${video.duration.toFixed(1)}s</div>
+                <div class="stat-tag">FPS: ${video.videoHeight >= 2160 ? 60 : 30}</div>
+                <div class="stat-tag">Size: ${sizeText}</div>
+            `;
+            vA.style.width = viewer.clientWidth + 'px';
+        };
+    }
+
+    playBtn.onclick = () => {
+        if (vB.paused) { vB.play(); playBtn.innerText = "PAUSE"; }
+        else { vB.pause(); playBtn.innerText = "PLAY"; }
     };
 
-    // 3. 对比交互与重置
+    progBar.oninput = () => {
+        const t = (progBar.value / 100) * vB.duration;
+        vB.currentTime = t; vA.currentTime = t;
+    };
+
     let isDragging = false;
     handle.onmousedown = () => isDragging = true;
     document.onmouseup = () => isDragging = false;
     document.onmousemove = e => {
         if (!isDragging) return;
-        let rect = viewer.getBoundingClientRect();
-        let x = ((e.pageX - rect.left) / rect.width) * 100;
-        x = Math.max(0, Math.min(100, x));
+        const rect = viewer.getBoundingClientRect();
+        let x = Math.max(0, Math.min(100, ((e.pageX - rect.left) / rect.width) * 100));
         handle.style.left = x + '%';
         wrapA.style.width = x + '%';
     };
 
-    function resetAll() {
-        vA.src = ""; vB.src = "";
-        document.querySelectorAll('input[type="text"]').forEach(i => i.value = "");
-        document.querySelectorAll('input[type="file"]').forEach(i => i.value = "");
-        document.getElementById('infoA').innerHTML = "";
-        document.getElementById('infoB').innerHTML = "";
-        playBtn.innerText = "PLAY";
+    function toggleFullscreen() {
+        const container = document.getElementById('mainPlayer');
+        if (!document.fullscreenElement) container.requestFullscreen();
+        else document.exitFullscreen();
     }
-
-    window.onresize = () => { vA.style.width = viewer.offsetWidth + 'px'; };
+    
+    function loadBoth() { handleSource('A', 'url'); handleSource('B', 'url'); }
+    function copyShareUrl() {
+        const u = new URL(window.location.href.split('?')[0]);
+        u.searchParams.set('vA', document.getElementById('urlA').value);
+        u.searchParams.set('vB', document.getElementById('urlB').value);
+        navigator.clipboard.writeText(u.href).then(() => alert("URL Copied!"));
+    }
 </script>
 </body>
 </html>
