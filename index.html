@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VideoDiff Pro v1.38</title>
+    <title>VideoDiff Pro v1.39</title>
     <style>
         :root { 
             --primary: #3b82f6; --bg: #0f172a; --text: #f8fafc; --border: #334155; --panel: #1e293b; 
@@ -28,19 +28,16 @@
         
         .loading-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 850px; margin-bottom: 15px; }
         .source-box { display: flex; flex-direction: column; gap: 5px; }
-        
-        /* 统一视频象形图标 */
         .source-box b { font-size: 13px; color: var(--primary); display: flex; align-items: center; gap: 6px; }
         .source-box b svg { width: 15px; height: 15px; fill: currentColor; }
 
         .input-row { display: flex; gap: 5px; }
         input[type="text"] { background: var(--panel); border: 1px solid var(--border); color: var(--text); padding: 4px 8px; border-radius: 4px; flex: 1; font-size: 12px; }
         
-        /* 调小按钮文字 */
         .btn-sm { background: var(--primary); border: none; color: white; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
         .btn-orange { background: #f59e0b; }
         
-        .stats { display: flex; gap: 8px; margin-top: 2px; }
+        .stats { display: flex; gap: 8px; margin-top: 2px; height: 16px; }
         .tag { font-size: 10px; color: var(--primary); background: rgba(59, 130, 246, 0.1); padding: 1px 5px; border-radius: 3px; }
 
         .viewer-wrap { width: 850px; height: 480px; background: #000; border: 1px solid var(--border); position: relative; display: flex; flex-direction: column; resize: both; overflow: hidden; }
@@ -124,13 +121,13 @@
 
 <script>
     function toggleTheme() {
-        const body = document.body;
-        body.setAttribute('data-theme', body.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+        document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
     }
 
     const vA=document.getElementById('vA'), vB=document.getElementById('vB'), box=document.getElementById('box'), 
           wrapA=document.getElementById('wrapperA'), han=document.getElementById('handle'), prog=document.getElementById('prog');
 
+    // 拖拽逻辑保持不动
     let drag = false;
     const move = (e) => {
         let r = box.getBoundingClientRect();
@@ -142,12 +139,37 @@
     window.onmousemove = (e) => drag && move(e);
     window.onmouseup = () => drag = false;
 
+    // --- 融合后的修复加载逻辑 ---
     function loadSource(t, m) {
-        const v = t==='A'?vA:vB, f=document.getElementById('f'+t).files[0], u=document.getElementById('u'+t).value;
-        v.src = m==='f'?URL.createObjectURL(f):u;
-        v.onloadedmetadata = () => { document.getElementById('i'+t).innerHTML = `<span class="tag">Res: ${v.videoWidth}x${v.videoHeight}</span><span class="tag">Dur: ${v.duration.toFixed(1)}s</span>`; };
+        const v = t==='A'?vA:vB;
+        const f = document.getElementById('f'+t).files[0];
+        let u = document.getElementById('u'+t).value.trim();
+        const info = document.getElementById('i'+t);
+
+        if (m === 'f' && f) {
+            v.src = URL.createObjectURL(f);
+        } else if (m === 'u' && u) {
+            // 自动补全协议并加载
+            if (!u.startsWith('http')) u = 'http://' + u;
+            v.src = u;
+            info.innerHTML = `<span class="tag" style="color:#f59e0b">Loading...</span>`;
+        }
+
+        v.onloadedmetadata = () => {
+            info.innerHTML = `<span class="tag">Res: ${v.videoWidth}x${v.videoHeight}</span><span class="tag">Dur: ${v.duration.toFixed(1)}s</span>`;
+        };
+
+        v.onerror = () => {
+            info.innerHTML = `<span class="tag" style="color:#ef4444">Load Error (CORS/SSL)</span>`;
+        };
     }
-    function loadBoth() { loadSource('A','u'); loadSource('B','u'); }
+
+    function loadBoth() { 
+        loadSource('A', 'u'); 
+        loadSource('B', 'u'); 
+    }
+
+    // 播放逻辑保持不动
     function play() { vB.paused ? vB.play() : vB.pause(); }
     vB.onplay = () => { vA.play(); document.getElementById('p-ic').innerHTML='<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'; };
     vB.onpause = () => { vA.pause(); document.getElementById('p-ic').innerHTML='<path d="M8 5v14l11-7z"/>'; };
@@ -170,7 +192,11 @@
     }
 
     function loadDemo(id) {
-        if(id===1) { document.getElementById('uA').value="http://reganaigc.cloudpeek.xyz/20260121-141149.mp4"; document.getElementById('uB').value="http://reganaigc.cloudpeek.xyz/oEI4FLCS04wcfqRxQpxcnjQ1weA4DQe7VEJc6N"; loadBoth(); }
+        if(id===1) { 
+            document.getElementById('uA').value="http://reganaigc.cloudpeek.xyz/20260121-141149.mp4"; 
+            document.getElementById('uB').value="http://reganaigc.cloudpeek.xyz/oEI4FLCS04wcfqRxQpxcnjQ1weA4DQe7VEJc6N"; 
+            loadBoth(); 
+        }
     }
     new ResizeObserver(() => vA.style.width = vB.offsetWidth + 'px').observe(box);
 </script>
