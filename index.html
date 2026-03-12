@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VideoDiff Pro v1.39</title>
+    <title>VideoDiff Pro v1.40</title>
     <style>
         :root { 
             --primary: #3b82f6; --bg: #0f172a; --text: #f8fafc; --border: #334155; --panel: #1e293b; 
@@ -23,7 +23,6 @@
             width: 830px; display: flex; gap: 10px; margin-bottom: 15px; padding: 10px; 
             border: 1px dashed var(--border); border-radius: 6px;
             background: rgba(30, 41, 59, 0.3);
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
         }
         
         .loading-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 850px; margin-bottom: 15px; }
@@ -37,16 +36,16 @@
         .btn-sm { background: var(--primary); border: none; color: white; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
         .btn-orange { background: #f59e0b; }
         
-        .stats { display: flex; gap: 8px; margin-top: 2px; height: 16px; }
+        .stats { display: flex; gap: 8px; margin-top: 2px; height: 16px; min-height: 16px; }
         .tag { font-size: 10px; color: var(--primary); background: rgba(59, 130, 246, 0.1); padding: 1px 5px; border-radius: 3px; }
 
-        .viewer-wrap { width: 850px; height: 480px; background: #000; border: 1px solid var(--border); position: relative; display: flex; flex-direction: column; resize: both; overflow: hidden; }
+        .viewer-wrap { width: 850px; height: 480px; background: #000; border: 1px solid var(--border); position: relative; display: flex; flex-direction: column; overflow: hidden; }
         .viewer-container { position: relative; flex: 1; overflow: hidden; cursor: col-resize; }
-        video { position: absolute; width: 100%; height: 100%; object-fit: contain; }
-        #wrapperA { position: absolute; top:0; left:0; width: 50%; height: 100%; overflow: hidden; border-right: 2px solid var(--primary); z-index: 10; pointer-events: none; }
+        video { position: absolute; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+        #wrapperA { position: absolute; top:0; left:0; width: 50%; height: 100%; overflow: hidden; border-right: 2px solid var(--primary); z-index: 10; }
         #handle { position: absolute; top: 0; left: 50%; width: 2px; height: 100%; background: var(--primary); transform: translateX(-50%); z-index: 20; pointer-events: none; }
         
-        .controls { background: var(--panel); height: 44px; display: flex; align-items: center; padding: 0 15px; gap: 12px; border-top: 1px solid var(--border); }
+        .controls { background: var(--panel); height: 44px; display: flex; align-items: center; padding: 0 15px; gap: 12px; border-top: 1px solid var(--border); z-index: 30; }
         .ctrl-btn { background: none; border: none; color: var(--text); cursor: pointer; display: flex; align-items: center; padding: 0; }
         .ctrl-btn svg { width: 18px; height: 18px; fill: currentColor; }
         #prog { flex: 1; accent-color: var(--primary); cursor: pointer; }
@@ -64,7 +63,6 @@
     </div>
     <div style="display:flex; gap:8px;">
         <button class="btn-sm" style="background:#ef4444" onclick="location.reload()">RESET</button>
-        <button class="btn-sm" style="background:#10b981">SHARE URL</button>
     </div>
 </div>
 
@@ -73,16 +71,12 @@
         <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h10v2H7zm0 4h10v2H7zm0-8h10v2H7z"/></svg>
         Demo 1 (Ads)
     </button>
-    <button class="icon-btn" style="opacity:0.4; display:flex; align-items:center; gap:6px;">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M13 7h-2v4H7v2h4v4h2v-4h4v-2h-4V7zm-1-5C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
-        Demo 2 (Soon)
-    </button>
 </div>
 
 <div class="loading-grid">
     <div class="source-box">
         <b><svg viewBox="0 0 24 24"><path d="M15 8v8H5V8h10m1-2H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1V7c0-.55-.45-1-1-1zm5 4l-3 3 3 3V10z"/></svg> Base (Original)</b>
-        <input type="file" id="fA" onchange="loadSource('A','f')" style="font-size:11px">
+        <input type="file" id="fA" onchange="loadSource('A','f')" style="font-size:11px" accept="video/*">
         <div class="input-row">
             <input type="text" id="uA" placeholder="URL">
             <button class="btn-sm" onclick="loadSource('A','u')">LOAD</button>
@@ -91,11 +85,11 @@
     </div>
     <div class="source-box">
         <b><svg viewBox="0 0 24 24"><path d="M15 8v8H5V8h10m1-2H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1V7c0-.55-.45-1-1-1zm5 4l-3 3 3 3V10z"/></svg> Comparison (Upscaled)</b>
-        <input type="file" id="fB" onchange="loadSource('B','f')" style="font-size:11px">
+        <input type="file" id="fB" onchange="loadSource('B','f')" style="font-size:11px" accept="video/*">
         <div class="input-row">
             <input type="text" id="uB" placeholder="URL">
             <button class="btn-sm" onclick="loadSource('B','u')">LOAD</button>
-            <button class="btn-sm btn-orange" onclick="loadBoth()">SYNC</button>
+            <button class="btn-sm btn-orange" onclick="loadBoth()">SYNC BOTH URL</button>
         </div>
         <div id="iB" class="stats"></div>
     </div>
@@ -108,9 +102,9 @@
         <div id="handle"></div>
     </div>
     <div class="controls">
-        <button class="ctrl-btn" onclick="play()"><svg id="p-ic" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <button class="ctrl-btn" onclick="togglePlay()"><svg id="p-ic" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
         <input type="range" id="prog" min="0" max="100" value="0" step="0.1">
-        <span id="time" style="font-size:11px; min-width:30px;">0.0s</span>
+        <span id="time" style="font-size:11px; min-width:40px;">0.0s</span>
         <div class="vol-wrap">
             <div class="ctrl-btn"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg></div>
             <input type="range" id="vol" min="0" max="1" step="0.1" value="1">
@@ -127,40 +121,52 @@
     const vA=document.getElementById('vA'), vB=document.getElementById('vB'), box=document.getElementById('box'), 
           wrapA=document.getElementById('wrapperA'), han=document.getElementById('handle'), prog=document.getElementById('prog');
 
-    // 拖拽逻辑保持不动
+    // 拖拽滑块逻辑
     let drag = false;
     const move = (e) => {
         let r = box.getBoundingClientRect();
-        let x = ((e.clientX - r.left) / r.width) * 100;
+        let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        let x = ((clientX - r.left) / r.width) * 100;
         x = Math.max(0, Math.min(100, x));
         han.style.left = wrapA.style.width = x + '%';
     };
     box.onmousedown = () => drag = true;
     window.onmousemove = (e) => drag && move(e);
     window.onmouseup = () => drag = false;
+    // 适配移动端
+    box.ontouchstart = () => drag = true;
+    window.ontouchmove = (e) => drag && move(e);
+    window.ontouchend = () => drag = false;
 
-    // --- 融合后的修复加载逻辑 ---
-    function loadSource(t, m) {
-        const v = t==='A'?vA:vB;
-        const f = document.getElementById('f'+t).files[0];
-        let u = document.getElementById('u'+t).value.trim();
-        const info = document.getElementById('i'+t);
-
-        if (m === 'f' && f) {
-            v.src = URL.createObjectURL(f);
-        } else if (m === 'u' && u) {
-            // 自动补全协议并加载
-            if (!u.startsWith('http')) u = 'http://' + u;
-            v.src = u;
-            info.innerHTML = `<span class="tag" style="color:#f59e0b">Loading...</span>`;
+    // 加载资源核心逻辑
+    function loadSource(type, mode) {
+        const video = type === 'A' ? vA : vB;
+        const info = document.getElementById('i' + type);
+        
+        if (mode === 'f') {
+            const file = document.getElementById('f' + type).files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                video.src = url;
+                info.innerHTML = `<span class="tag">Local File Loaded</span>`;
+            }
+        } else {
+            let url = document.getElementById('u' + type).value.trim();
+            if (url) {
+                if (!url.startsWith('http') && !url.startsWith('/')) url = 'http://' + url;
+                video.src = url;
+                info.innerHTML = `<span class="tag" style="color:#f59e0b">Loading URL...</span>`;
+            }
         }
 
-        v.onloadedmetadata = () => {
-            info.innerHTML = `<span class="tag">Res: ${v.videoWidth}x${v.videoHeight}</span><span class="tag">Dur: ${v.duration.toFixed(1)}s</span>`;
+        video.onloadedmetadata = () => {
+            info.innerHTML = `<span class="tag">Res: ${video.videoWidth}x${video.videoHeight}</span><span class="tag">Dur: ${video.duration.toFixed(1)}s</span>`;
+            // 如果两个视频都好了，同步一下时长
+            if(vA.duration && vB.duration) vA.currentTime = vB.currentTime;
         };
 
-        v.onerror = () => {
-            info.innerHTML = `<span class="tag" style="color:#ef4444">Load Error (CORS/SSL)</span>`;
+        video.onerror = () => {
+            info.innerHTML = `<span class="tag" style="color:#ef4444">Load Error (CORS/Format)</span>`;
         };
     }
 
@@ -169,26 +175,43 @@
         loadSource('B', 'u'); 
     }
 
-    // 播放逻辑保持不动
-    function play() { vB.paused ? vB.play() : vB.pause(); }
-    vB.onplay = () => { vA.play(); document.getElementById('p-ic').innerHTML='<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'; };
-    vB.onpause = () => { vA.pause(); document.getElementById('p-ic').innerHTML='<path d="M8 5v14l11-7z"/>'; };
+    function togglePlay() { 
+        if (vB.paused) {
+            vB.play().catch(e => console.log("Play blocked"));
+            vA.play().catch(e => {});
+        } else {
+            vB.pause();
+            vA.pause();
+        }
+    }
+
+    vB.onplay = () => { document.getElementById('p-ic').innerHTML='<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'; };
+    vB.onpause = () => { document.getElementById('p-ic').innerHTML='<path d="M8 5v14l11-7z"/>'; };
+
     vB.ontimeupdate = () => { 
-        prog.value = (vB.currentTime/vB.duration)*100 || 0; 
-        document.getElementById('time').innerText = vB.currentTime.toFixed(1)+'s';
-        if(Math.abs(vA.currentTime-vB.currentTime)>0.1) vA.currentTime=vB.currentTime;
+        if (!prog.dragging) {
+            prog.value = (vB.currentTime / vB.duration) * 100 || 0; 
+            document.getElementById('time').innerText = vB.currentTime.toFixed(1) + 's';
+        }
+        // 强制同步 A 视频
+        if(Math.abs(vA.currentTime - vB.currentTime) > 0.1) vA.currentTime = vB.currentTime;
     };
-    prog.oninput = () => vB.currentTime = vA.currentTime = (prog.value/100)*vB.duration;
-    document.getElementById('vol').oninput = (e) => vA.volume = vB.volume = e.target.value;
+
+    prog.onmousedown = () => prog.dragging = true;
+    prog.onmouseup = () => prog.dragging = false;
+    prog.oninput = () => {
+        const time = (prog.value / 100) * vB.duration;
+        vB.currentTime = vA.currentTime = time;
+    };
+
+    document.getElementById('vol').oninput = (e) => {
+        vA.volume = vB.volume = e.target.value;
+    };
     
     function full() {
         const p = document.getElementById('player');
-        if (!document.fullscreenElement) {
-            if (p.requestFullscreen) p.requestFullscreen();
-            else if (p.webkitRequestFullscreen) p.webkitRequestFullscreen();
-        } else {
-            document.exitFullscreen();
-        }
+        if (!document.fullscreenElement) p.requestFullscreen?.() || p.webkitRequestFullscreen?.();
+        else document.exitFullscreen?.();
     }
 
     function loadDemo(id) {
@@ -198,7 +221,14 @@
             loadBoth(); 
         }
     }
-    new ResizeObserver(() => vA.style.width = vB.offsetWidth + 'px').observe(box);
+
+    // 自动对齐宽度逻辑
+    const obs = new ResizeObserver(() => {
+        const rect = box.getBoundingClientRect();
+        vA.style.width = rect.width + 'px';
+        vA.style.height = rect.height + 'px';
+    });
+    obs.observe(box);
 </script>
 </body>
 </html>
